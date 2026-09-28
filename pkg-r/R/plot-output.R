@@ -42,15 +42,12 @@ plot_base64_data <- function(data) {
   gsub("\n", "", jsonlite::base64_enc(data), fixed = TRUE)
 }
 
-# Renders the UI image at the pixel ratio and the model image at 1x. The model
-# image is drawn at its own size rather than downscaled from the UI image, so
-# nothing decodes a rendered PNG. The plot is printed once and the recording
-# replayed for the model image: printing a ggplot twice would redraw anything
-# random, such as geom_jitter(), differently in each image.
 render_plot_pngs <- function(plot, paths, dims, call = rlang::caller_env()) {
   open_plot_device(paths$ui, dims, dims$pixel_ratio)
   recording <- tryCatch(
     {
+      # Replaying one recording, rather than printing twice, keeps random
+      # draws like geom_jitter() identical in both images.
       grDevices::dev.control(displaylist = "enable")
       print(plot)
       grDevices::recordPlot()
@@ -75,9 +72,8 @@ render_plot_pngs <- function(plot, paths, dims, call = rlang::caller_env()) {
 }
 
 # HTML displays the 2x image at half its pixel dimensions, giving browsers two
-# image pixels per CSS pixel. Scaling resolution with the pixel ratio keeps
-# text and point sizes at the logical display size, so every image of a plot
-# has the same layout.
+# image pixels per CSS pixel. Scaling resolution too preserves text and point
+# sizes at the logical display size.
 open_plot_device <- function(path, dims, pixel_ratio) {
   ragg::agg_png(
     path,

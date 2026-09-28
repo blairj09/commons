@@ -514,9 +514,6 @@ worker_run_code <- function(
     if (is.null(last_plot)) {
       return()
     }
-    # The UI image is drawn at the pixel ratio and the model image at 1x, both
-    # from the same recording, so the parent never has to decode a PNG to
-    # downscale it.
     add(
       "plot",
       path = render_plot(plot_pixel_ratio),
@@ -526,10 +523,9 @@ worker_run_code <- function(
   }
   render_plot <- function(pixel_ratio) {
     path <- tempfile("plot-", fileext = ".png")
-    # HTML displays the 2x image at half its pixel dimensions, giving browsers
-    # two image pixels per CSS pixel. Scaling resolution with the pixel ratio
-    # keeps text and point sizes at the logical display size, so both images
-    # have the same layout.
+    # HTML displays this 2x image at half its pixel dimensions, giving browsers
+    # two image pixels per CSS pixel. Scaling resolution too preserves text and
+    # point sizes at the logical display size.
     ragg::agg_png(
       path,
       width = plot_width * pixel_ratio,
